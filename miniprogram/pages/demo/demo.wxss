@@ -1,0 +1,6 @@
+/* miniprogram/pages/demo.wxss */
+.addUser,
+.userList,
+.listItem {
+  padding: 20rpx;
+}
