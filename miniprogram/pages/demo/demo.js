@@ -6,12 +6,13 @@ const app = getApp();
 Page({
   //页面的初始数据
   data: {
+    modalName:"",
     name: "",
     tel: "",
-    newName: "",
-    newTel: "",
+    newName:"",
+    newTel:"",
+    _id:"",
     userList: [],
-    isOpen: false,
   },
 
   // 监听页面加载
@@ -19,72 +20,84 @@ Page({
     this.get();
   },
 
-  insName(e) {
-    this.setData({
-      name: e.detail.detail.value,
-    });
-  },
-  insTel(e) {
-    this.setData({
-      tel: e.detail.detail.value,
-    });
-  },
-  insNewName(e) {
-    this.setData({
-      newName: e.detail.detail.value,
-    });
-  },
-  insNewTel(e) {
-    this.setData({
-      newTel: e.detail.detail.value,
-    });
-  },
-
-  // 打开模态框
-  handleOpen(e) {
-    this.setData({
-      isOpen: true,
-    });
-    const { id } = e.currentTarget.dataset;
-    app.globalData.userId = id;
-    this.getById(id);
-  },
-
-  // 关闭模态框
-  handleClose() {
-    this.setData({
-      isOpen: false,
-    });
-  },
-
-  // 新增
-  add() {
+  // 查询
+  get() {
     db.collection("user")
-      .add({
-        data: {
-          name: this.data.name,
-          tel: this.data.tel,
-        },
-      })
+      .get()
       .then((res) => {
-        // 再获取一次
-        this.get();
         this.setData({
-          name: "",
-          tel: "",
-        });
-        wx.showToast({
-          title: "新增成功",
-          icon: "none",
-          duration: 1500,
+          userList: res.data,
         });
       })
       .catch(console.error);
   },
 
+  // 表单提交
+  addSubmit(e){
+    this.setData({
+      name: e.detail.value.name,
+      tel:e.detail.value.tel
+    });
+  },
+  updateSubmit(e){
+    this.setData({
+      newName: e.detail.value.name,
+      newTel:e.detail.value.tel
+    });
+  },
+
+  // 添加
+  add(){
+  db.collection("user")
+  .add({
+    data: {
+      name:this.data.name,
+      tel: this.data.tel
+    },
+  })
+  .then((res) => {
+    this.setData({
+      name:"",
+      tel:""
+    })
+    // 再获取一次
+    this.get();
+    this.hideModal()
+    wx.showToast({
+      title: "新增成功",
+      icon: "none",
+      duration: 1500,
+    });
+  })
+  .catch(console.error);
+},
+
+ // 打开模态框
+  showModal(e) {
+    this.setData({
+      modalName: e.currentTarget.dataset.target
+    })
+    let item  = e.currentTarget.dataset.item;
+    // 点击修改时，初始化数据
+    if(item){
+      this.setData({
+        newName:item.name,
+        newTel:item.tel,
+        _id:item._id
+      })
+    }
+  },
+
+  // 关闭模态框
+  hideModal(e) {
+    this.setData({
+      modalName: null,
+    })
+  },
+
   // 删除
   delete(e) {
-    const { id } = e.currentTarget.dataset;
+    let { id } = e.currentTarget.dataset;
     db.collection("user")
       .where({
         _id: id,
@@ -102,39 +115,11 @@ Page({
       .catch(console.error);
   },
 
-  // 查询
-  get() {
-    db.collection("user")
-      .get()
-      .then((res) => {
-        this.setData({
-          userList: res.data,
-        });
-      })
-      .catch(console.error);
-  },
-
-  // 根据id查询
-  getById(id) {
-    db.collection("user")
-      .where({
-        _id: id,
-      })
-      .get()
-      .then((res) => {
-        this.setData({
-          newName: res.data[0].name,
-          newTel: res.data[0].tel,
-        });
-      })
-      .catch(console.error);
-  },
-
   // 修改
   handleUpdate() {
     db.collection("user")
       .where({
-        _id: app.globalData.userId,
+        _id: this.data._id,
       })
       .update({
         data: {
@@ -144,7 +129,7 @@ Page({
       })
       .then((res) => {
         this.get();
-        this.handleClose();
+        this.hideModal();
 
         wx.showToast({
           title: "修改成功",

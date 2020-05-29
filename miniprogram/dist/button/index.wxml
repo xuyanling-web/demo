@@ -17,4 +17,5 @@
     bindgetphonenumber="bindgetphonenumber"
     binderror="binderror"
     plain="true"
+    formType="submit"
 ><view class="i-btn-loading-inner" wx:if="{{loading}}"></view><slot></slot></button>

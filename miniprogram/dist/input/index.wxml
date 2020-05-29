@@ -13,6 +13,7 @@
         bindinput="handleInputChange"
         bindfocus="handleInputFocus"
         bindblur="handleInputBlur"
+        name="{{name}}"
     ></textarea>
     <input
         wx:else

@@ -20,6 +20,10 @@ Component({
             type: String,
             value: ''
         },
+        name: {
+            type: String,
+            value: ''
+        },
         autofocus: {
             type: Boolean,
             value: false
